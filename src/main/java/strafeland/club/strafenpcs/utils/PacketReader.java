@@ -4,8 +4,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import strafeland.club.strafenpcs.Main;
 
 import java.lang.reflect.Field;
@@ -35,20 +38,7 @@ public class PacketReader implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         inject(e.getPlayer());
-
-        new org.bukkit.scheduler.BukkitRunnable() {
-            @Override
-            public void run() {
-                try {
-                    Field mapField = plugin.getNpcManager().getClass().getDeclaredField("nameToNpc");
-                    mapField.setAccessible(true);
-                    Map<String, Object> npcs = (Map<String, Object>) mapField.get(plugin.getNpcManager());
-                    for (Object npc : npcs.values()) {
-                        plugin.getNpcManager().sendPackets(e.getPlayer(), npc);
-                    }
-                } catch (Exception ex) { ex.printStackTrace(); }
-            }
-        }.runTaskLater(plugin, 20L);
+        updateNPCs(e.getPlayer());
     }
 
     @EventHandler
@@ -56,13 +46,48 @@ public class PacketReader implements Listener {
         uninject(e.getPlayer());
     }
 
+    @EventHandler
+    public void onWorldChange(PlayerChangedWorldEvent e) {
+        updateNPCs(e.getPlayer());
+    }
+
+    @EventHandler
+    public void onTeleport(PlayerTeleportEvent e) {
+        if (e.getFrom().getWorld() != e.getTo().getWorld() || e.getFrom().distanceSquared(e.getTo()) > 256) {
+            updateNPCs(e.getPlayer());
+        }
+    }
+
+    @EventHandler
+    public void onRespawn(PlayerRespawnEvent e) {
+        updateNPCs(e.getPlayer());
+    }
+
+    private void updateNPCs(Player p) {
+        new org.bukkit.scheduler.BukkitRunnable() {
+            @Override
+            public void run() {
+                if (!p.isOnline()) return;
+                try {
+                    Field mapField = plugin.getNpcManager().getClass().getDeclaredField("nameToNpc");
+                    mapField.setAccessible(true);
+                    Map<String, Object> npcs = (Map<String, Object>) mapField.get(plugin.getNpcManager());
+
+                    for (Object npc : npcs.values()) {
+                        plugin.getNpcManager().sendPackets(p, npc);
+                    }
+                } catch (Exception ex) { ex.printStackTrace(); }
+            }
+        }.runTaskLater(plugin, 20L);
+    }
+
     public static void inject(Player p) {
         try {
             Object handle = p.getClass().getMethod("getHandle").invoke(p);
             Object playerConnection = handle.getClass().getField("playerConnection").get(handle);
             Object networkManager = playerConnection.getClass().getField("networkManager").get(playerConnection);
-            Field channelField = null;
 
+            Field channelField = null;
             for (Field f : networkManager.getClass().getDeclaredFields()) {
                 if (f.getType().getName().contains("Channel")) {
                     channelField = f;
@@ -73,9 +98,11 @@ public class PacketReader implements Listener {
             if (channelField != null) {
                 channelField.setAccessible(true);
                 Object channel = channelField.get(networkManager);
+
                 Method getPipelineMethod = channel.getClass().getMethod("pipeline");
                 getPipelineMethod.setAccessible(true);
                 Object pipeline = getPipelineMethod.invoke(channel);
+
                 Method getMethod = pipeline.getClass().getMethod("get", String.class);
 
                 if (getMethod.invoke(pipeline, "DeluxeNPCReader") == null) {

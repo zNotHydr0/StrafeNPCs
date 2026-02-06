@@ -1,0 +1,12 @@
+name: StrafeNPCs
+version: 1.0
+main: strafeland.club.deluxenpcs.Main
+api-version: 1.13
+authors: [zNotHydr0]
+description: StrafeNPCs. Created by [zNotHydr0]
+website: www.strafeland.club
+commands:
+  npc:
+    description: Principal command to manage NPCs.
+    usage: /npc <subcommand>
+    aliases: [npcs]

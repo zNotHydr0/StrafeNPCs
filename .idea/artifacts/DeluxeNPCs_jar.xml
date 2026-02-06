@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="DeluxeNPCs:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/DeluxeNPCs_jar</output-path>
+    <root id="archive" name="DeluxeNPCs.jar">
+      <element id="module-output" name="StrafeNPCs" />
+    </root>
+  </artifact>
+</component>

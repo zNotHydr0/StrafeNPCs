@@ -1,6 +1,6 @@
 name: StrafeNPCs
 version: 1.0
-main: strafeland.club.deluxenpcs.Main
+main: strafeland.club.strafenpcs.Main
 api-version: 1.13
 authors: [zNotHydr0]
 description: StrafeNPCs. Created by [zNotHydr0]

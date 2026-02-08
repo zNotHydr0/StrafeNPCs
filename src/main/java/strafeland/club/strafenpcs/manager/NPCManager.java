@@ -289,6 +289,10 @@ public class NPCManager {
         }
     }
 
+    public Set<String> getNPCNames() {
+        return nameToNpc.keySet();
+    }
+
     private void saveLocationToConfig(String name, Location loc) {
         String path = "npcs." + name + ".location";
         plugin.getFileManager().getSaves().set(path + ".world", loc.getWorld().getName());

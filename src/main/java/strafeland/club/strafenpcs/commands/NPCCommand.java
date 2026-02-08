@@ -27,6 +27,11 @@ public class NPCCommand implements CommandExecutor {
 
         String sub = args[0].toLowerCase();
 
+        // Help
+        if (sub.equals("help")){
+            p.sendMessage(plugin.getFileManager().getMsg("chat-messages.usage"));
+        }
+
         // Create
         if (sub.equals("create")) {
             if (args.length < 2) {

@@ -27,6 +27,7 @@ public class Main extends JavaPlugin {
 
         // Register commands
         getCommand("npc").setExecutor(new NPCCommand(this));
+        getCommand("npc").setTabCompleter(new strafeland.club.strafenpcs.commands.NPCTabCompleter(this));
 
         // Load PacketReader
         PacketReader.init(this);

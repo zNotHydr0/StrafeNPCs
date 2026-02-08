@@ -105,7 +105,7 @@ public class PacketReader implements Listener {
 
                 Method getMethod = pipeline.getClass().getMethod("get", String.class);
 
-                if (getMethod.invoke(pipeline, "DeluxeNPCReader") == null) {
+                if (getMethod.invoke(pipeline, "StrafeNPCReader") == null) {
 
                     Class<?> inboundHandlerClass = Class.forName("io.netty.channel.ChannelInboundHandler");
 
@@ -172,7 +172,7 @@ public class PacketReader implements Listener {
 
                     Method addBefore = pipeline.getClass().getMethod("addBefore", String.class, String.class, Class.forName("io.netty.channel.ChannelHandler"));
                     addBefore.setAccessible(true);
-                    addBefore.invoke(pipeline, "packet_handler", "DeluxeNPCReader", handlerProxy);
+                    addBefore.invoke(pipeline, "packet_handler", "StrafeNPCReader", handlerProxy);
                 }
             }
         } catch (Exception e) {

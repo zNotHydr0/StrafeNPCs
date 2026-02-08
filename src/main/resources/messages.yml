@@ -1,7 +1,7 @@
 chat-messages:
   prefix: "&8[&cStrafe&fNPCs&8] &r"
   no-permission: "&cYou do not have permission to execute this command."
-  usage: "&cUsage: &7/npc <create|delete|skin|cmd|look>"
+  usage: "&cUsage: &7/npc <create|delete|skin|cmd|look|tp|tphere>"
 
   # NPC Management
   npc-created: "&aSuccessfully created NPC: &e%name%&a."

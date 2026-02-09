@@ -1,26 +1,34 @@
+# ==============================================================================
+# StrafeNPCs Messages
+# ==============================================================================
+#   Placeholders:
+#   %name% - The name of the NPC.
+#   %skin% - The name of the skin.
+
 chat-messages:
+# Main messages
   prefix: "&8[&cStrafe&fNPCs&8] &r"
   no-permission: "&cYou do not have permission to execute this command."
   usage: "&cUsage: &7/npc <create|delete|skin|cmd|look|tp|tphere>"
 
-  # NPC Management
+# NPC Management
   npc-created: "&aSuccessfully created NPC: &e%name%&a."
   npc-deleted: "&cThe NPC &4%name% &chas been deleted."
   npc-exists: "&cAn NPC with the name &4%name% &calready exists."
   npc-not-found: "&cNo NPC found with the name &4%name%&c."
 
-  # Edit Mode
+# Edit Mode
   npc-selected: "&aYou have selected NPC: &e%name%&a."
   not-editing: "&cNo NPC selected. Please use &e/npc edit <name> &cfirst."
   npc-editing-not-found: "&cThe NPC &4%name% &cdoes not exist or is not loaded."
 
-  # Actions
+# Actions
   skin-updating: "&7Contacting Mojang API to fetch skin for: &b%skin%&7..."
   skin-updated: "&aSkin successfully updated!"
   skin-error: "&cError fetching skin. Ensure the name &4%skin% &cbelongs to a premium account."
   command-set: "&aCommand attached to NPC: &e/%cmd%"
 
-  # Movement
+# Movement
   npc-teleported: "&aTeleported to NPC &e%name%&a."
   npc-moved: "&aNPC &e%name% &ahas been moved to your location."
   npc-looked: "&aNPC &e%name% &ais now looking at you."

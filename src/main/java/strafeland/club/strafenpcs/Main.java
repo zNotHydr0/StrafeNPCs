@@ -36,7 +36,7 @@ public class Main extends JavaPlugin {
         npcManager.loadNPCs();
 
         // Notify Console
-        Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_GRAY + "[" + ChatColor.DARK_AQUA + "StrafeNPCS" + ChatColor.DARK_GRAY + ChatColor.GREEN + " Plugin has been enabled successfully. Created by zNotHydr0 :)");
+        Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_GRAY + "[" + ChatColor.DARK_AQUA + "StrafeNPCS" + ChatColor.DARK_GRAY + "]" + ChatColor.GREEN + " Plugin has been enabled successfully. Created by zNotHydr0 :)");
     }
 
     @Override

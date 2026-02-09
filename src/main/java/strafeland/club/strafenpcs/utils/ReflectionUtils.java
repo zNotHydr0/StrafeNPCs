@@ -7,6 +7,10 @@ public class ReflectionUtils {
 
     private static final String VERSION = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
 
+    /**
+     * Dynamically loads a NMS (Net.Minecraft.Server) class based on the server version
+     * This allows the plugin to work across different Spigot versions without changing imports
+     */
     public static Class<?> getNMSClass(String name) {
         try {
             return Class.forName("net.minecraft.server." + VERSION + "." + name);
@@ -25,6 +29,11 @@ public class ReflectionUtils {
         }
     }
 
+
+    /**
+     * Sends a raw NMS packet to a specific player using Reflection
+     * It accesses the player's 'playerConnection' field to invoke the 'sendPacket' method
+     */
     public static void sendPacket(Player player, Object packet) {
         try {
             Object handle = player.getClass().getMethod("getHandle").invoke(player);

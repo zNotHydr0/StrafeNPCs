@@ -44,6 +44,7 @@ public class NPCManager {
 
     public String getNameById(int id) { return idToName.get(id); }
 
+    // Creates the NMS EntityPlayer instance using Reflection
     public void createNPC(String name, Location loc) {
         try {
             Object server = ReflectionUtils.getCraftClass("CraftServer").cast(Bukkit.getServer()).getClass().getMethod("getServer").invoke(Bukkit.getServer());
@@ -93,6 +94,7 @@ public class NPCManager {
         teleportNPC(npcName, directionLoc);
     }
 
+    // Hides the NPC's nametag by adding it to a Scoreboard Team with NameTagVisibility.NEVER
     private void hideName(Player p, String npcName) {
         Scoreboard sb = p.getScoreboard();
         if (sb == null) sb = Bukkit.getScoreboardManager().getMainScoreboard();
@@ -120,6 +122,7 @@ public class NPCManager {
         plugin.getFileManager().saveSaves();
     }
 
+    // Fetches skin data from Mojang API asynchronously and updates the NPC's GameProfile
     public void changeSkin(Player admin, String npcName, String skinName) {
         new BukkitRunnable() {
             @Override
@@ -172,6 +175,7 @@ public class NPCManager {
         } catch (Exception e) { e.printStackTrace(); return null; }
     }
 
+    // Teleports an existing NPC to a new location
     public void teleportNPC(String name, Location newLoc) {
         if (!nameToNpc.containsKey(name)) return;
         Object npc = nameToNpc.get(name);
@@ -216,6 +220,7 @@ public class NPCManager {
         spawnNPC(npc);
     }
 
+    // Constructs and sends all necessary packets to render the NPC for a player
     public void sendPackets(Player p, Object npc) {
         try {
             Class<?> infoClass = ReflectionUtils.getNMSClass("PacketPlayOutPlayerInfo");
@@ -262,6 +267,7 @@ public class NPCManager {
         nameToNpc.clear(); idToName.clear();
     }
 
+    // Loads all saved NPCs from 'saves.yml' when the server starts
     public void loadNPCs() {
         if (!plugin.getFileManager().getSaves().contains("npcs")) return;
         for (String key : plugin.getFileManager().getSaves().getConfigurationSection("npcs").getKeys(false)) {

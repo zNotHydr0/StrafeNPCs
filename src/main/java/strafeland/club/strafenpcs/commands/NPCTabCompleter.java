@@ -19,6 +19,7 @@ public class NPCTabCompleter implements TabCompleter {
         this.plugin = plugin;
     }
 
+    // Handles Tab Completion for commands
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();

@@ -63,6 +63,11 @@ public class PacketReader implements Listener {
         updateNPCs(e.getPlayer());
     }
 
+    /**
+     * Re-sends NPC packets when a player changes worlds or teleports far away
+     * Since packet entities are not persistent, the client removes them when chunks unload
+     * We wait 20 ticks (1 second) to ensure the client has finished loading the new chunk
+     */
     private void updateNPCs(Player p) {
         new org.bukkit.scheduler.BukkitRunnable() {
             @Override
@@ -81,6 +86,11 @@ public class PacketReader implements Listener {
         }.runTaskLater(plugin, 20L);
     }
 
+    /**
+     * Injects a custom ChannelHandler into the player's network pipeline
+     * This intercepts incoming packets from the client to the server
+     * Specifically listens for 'PacketPlayInUseEntity' to detect right-clicks on NPCs
+     */
     public static void inject(Player p) {
         try {
             Object handle = p.getClass().getMethod("getHandle").invoke(p);
@@ -105,6 +115,7 @@ public class PacketReader implements Listener {
 
                 Method getMethod = pipeline.getClass().getMethod("get", String.class);
 
+                // Check if the handler is already injected to avoid duplicates
                 if (getMethod.invoke(pipeline, "StrafeNPCReader") == null) {
 
                     Class<?> inboundHandlerClass = Class.forName("io.netty.channel.ChannelInboundHandler");

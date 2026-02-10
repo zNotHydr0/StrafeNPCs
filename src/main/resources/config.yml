@@ -7,5 +7,12 @@
 # Created by zNotHydr0
 # Github: https://github.com/zNotHydr0
 
-# Configuration
+# Debug
 debug: false
+
+# Time to wait to show NPCs on enter the server.
+# 20 ticks = 1 second.
+# Recommended:
+# - Lobby/Hub: 40 or 60
+# - Survival/Factions: 20
+join-delay-ticks: 40

@@ -38,7 +38,9 @@ public class PacketReader implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         inject(e.getPlayer());
-        updateNPCs(e.getPlayer());
+        long delay = plugin.getFileManager().getConfig().getLong("join-delay-ticks", 40L);
+
+        updateNPCs(e.getPlayer(), delay);
     }
 
     @EventHandler
@@ -48,19 +50,19 @@ public class PacketReader implements Listener {
 
     @EventHandler
     public void onWorldChange(PlayerChangedWorldEvent e) {
-        updateNPCs(e.getPlayer());
+        updateNPCs(e.getPlayer(), 20L);
     }
 
     @EventHandler
     public void onTeleport(PlayerTeleportEvent e) {
         if (e.getFrom().getWorld() != e.getTo().getWorld() || e.getFrom().distanceSquared(e.getTo()) > 256) {
-            updateNPCs(e.getPlayer());
+            updateNPCs(e.getPlayer(), 20L);
         }
     }
 
     @EventHandler
     public void onRespawn(PlayerRespawnEvent e) {
-        updateNPCs(e.getPlayer());
+        updateNPCs(e.getPlayer(), 20L);
     }
 
     /**
@@ -68,7 +70,7 @@ public class PacketReader implements Listener {
      * Since packet entities are not persistent, the client removes them when chunks unload
      * We wait 20 ticks (1 second) to ensure the client has finished loading the new chunk
      */
-    private void updateNPCs(Player p) {
+    private void updateNPCs(Player p, long delay) {
         new org.bukkit.scheduler.BukkitRunnable() {
             @Override
             public void run() {
@@ -83,7 +85,7 @@ public class PacketReader implements Listener {
                     }
                 } catch (Exception ex) { ex.printStackTrace(); }
             }
-        }.runTaskLater(plugin, 20L);
+        }.runTaskLater(plugin, delay);
     }
 
     /**
@@ -115,11 +117,8 @@ public class PacketReader implements Listener {
 
                 Method getMethod = pipeline.getClass().getMethod("get", String.class);
 
-                // Check if the handler is already injected to avoid duplicates
-                if (getMethod.invoke(pipeline, "StrafeNPCReader") == null) {
-
+                if (getMethod.invoke(pipeline, "DeluxeNPCReader") == null) {
                     Class<?> inboundHandlerClass = Class.forName("io.netty.channel.ChannelInboundHandler");
-
                     Object handlerProxy = Proxy.newProxyInstance(
                             PacketReader.class.getClassLoader(),
                             new Class[]{inboundHandlerClass},
@@ -153,7 +152,12 @@ public class PacketReader implements Listener {
                                                     Bukkit.getScheduler().runTask(plugin, () -> {
                                                         String cmd = plugin.getFileManager().getSaves().getString("npcs." + npcName + ".command");
                                                         if (cmd != null && !cmd.isEmpty()) {
-                                                            p.performCommand(cmd);
+                                                            String finalCmd = cmd.replace("%player%", p.getName());
+                                                            if (finalCmd.startsWith("server ")) {
+                                                                p.chat("/" + finalCmd);
+                                                            } else {
+                                                                p.performCommand(finalCmd);
+                                                            }
                                                         }
                                                     });
                                                 }
@@ -183,7 +187,7 @@ public class PacketReader implements Listener {
 
                     Method addBefore = pipeline.getClass().getMethod("addBefore", String.class, String.class, Class.forName("io.netty.channel.ChannelHandler"));
                     addBefore.setAccessible(true);
-                    addBefore.invoke(pipeline, "packet_handler", "StrafeNPCReader", handlerProxy);
+                    addBefore.invoke(pipeline, "packet_handler", "DeluxeNPCReader", handlerProxy);
                 }
             }
         } catch (Exception e) {

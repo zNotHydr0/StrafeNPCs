@@ -1,6 +1,7 @@
 package strafeland.club.strafenpcs.utils;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -10,7 +11,8 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import strafeland.club.strafenpcs.Main;
-
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -39,7 +41,6 @@ public class PacketReader implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         inject(e.getPlayer());
         long delay = plugin.getFileManager().getConfig().getLong("join-delay-ticks", 40L);
-
         updateNPCs(e.getPlayer(), delay);
     }
 
@@ -65,11 +66,6 @@ public class PacketReader implements Listener {
         updateNPCs(e.getPlayer(), 20L);
     }
 
-    /**
-     * Re-sends NPC packets when a player changes worlds or teleports far away
-     * Since packet entities are not persistent, the client removes them when chunks unload
-     * We wait 20 ticks (1 second) to ensure the client has finished loading the new chunk
-     */
     private void updateNPCs(Player p, long delay) {
         new org.bukkit.scheduler.BukkitRunnable() {
             @Override
@@ -88,11 +84,6 @@ public class PacketReader implements Listener {
         }.runTaskLater(plugin, delay);
     }
 
-    /**
-     * Injects a custom ChannelHandler into the player's network pipeline
-     * This intercepts incoming packets from the client to the server
-     * Specifically listens for 'PacketPlayInUseEntity' to detect right-clicks on NPCs
-     */
     public static void inject(Player p) {
         try {
             Object handle = p.getClass().getMethod("getHandle").invoke(p);
@@ -151,12 +142,34 @@ public class PacketReader implements Listener {
                                                 if (npcName != null) {
                                                     Bukkit.getScheduler().runTask(plugin, () -> {
                                                         String cmd = plugin.getFileManager().getSaves().getString("npcs." + npcName + ".command");
+
                                                         if (cmd != null && !cmd.isEmpty()) {
                                                             String finalCmd = cmd.replace("%player%", p.getName());
+
+                                                            if (finalCmd.startsWith("/")) {
+                                                                finalCmd = finalCmd.substring(1);
+                                                            }
+
+                                                            if (finalCmd.startsWith("msg:")) {
+                                                                String message = finalCmd.substring(4).trim();
+                                                                p.sendMessage(ChatColor.translateAlternateColorCodes('&', message));
+                                                                return;
+                                                            }
+
                                                             if (finalCmd.startsWith("server ")) {
-                                                                p.chat("/" + finalCmd);
-                                                            } else {
+                                                                String targetServer = finalCmd.split(" ")[1];
+                                                                ByteArrayDataOutput out = ByteStreams.newDataOutput();out.writeUTF("Connect");out.writeUTF(targetServer);
+
+                                                                p.sendPluginMessage(plugin, "BungeeCord", out.toByteArray());
+                                                                return;
+                                                            }
+
+                                                            String executor = plugin.getFileManager().getSaves().getString("npcs." + npcName + ".executor", "CONSOLE");
+
+                                                            if (executor.equalsIgnoreCase("PLAYER")) {
                                                                 p.performCommand(finalCmd);
+                                                            } else {
+                                                                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), finalCmd);
                                                             }
                                                         }
                                                     });

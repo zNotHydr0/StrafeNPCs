@@ -27,6 +27,8 @@ chat-messages:
   skin-updated: "&aSkin successfully updated!"
   skin-error: "&cError fetching skin. Ensure the name &4%skin% &cbelongs to a premium account."
   command-set: "&aCommand attached to NPC: &e/%cmd%"
+  executor-set: "&aThe executor of the NPC &e%name% &achanged to: &b%type%&a."
+  invalid-executor: "&cInvalid excutor. Use: &7/npc executor <console|player>"
 
 # Movement
   npc-teleported: "&aTeleported to NPC &e%name%&a."

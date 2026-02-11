@@ -295,6 +295,11 @@ public class NPCManager {
         }
     }
 
+    public void setExecutorType(String npcName, String type) {
+        plugin.getFileManager().getSaves().set("npcs." + npcName + ".executor", type.toUpperCase());
+        plugin.getFileManager().saveSaves();
+    }
+
     public Set<String> getNPCNames() {
         return nameToNpc.keySet();
     }

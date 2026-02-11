@@ -19,13 +19,12 @@ public class NPCTabCompleter implements TabCompleter {
         this.plugin = plugin;
     }
 
-    // Handles Tab Completion for commands
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> completions = new ArrayList<>();
 
         if (args.length == 1) {
-            List<String> subcommands = Arrays.asList("create", "delete", "skin", "cmd", "tp", "tphere", "edit", "look");
+            List<String> subcommands = Arrays.asList("create", "delete", "skin", "cmd", "tp", "tphere", "edit", "look", "executor");
             StringUtil.copyPartialMatches(args[0], subcommands, completions);
             Collections.sort(completions);
             return completions;
@@ -34,7 +33,7 @@ public class NPCTabCompleter implements TabCompleter {
         if (args.length == 2) {
             String sub = args[0].toLowerCase();
 
-            if (sub.equals("delete") || sub.equals("tp") || sub.equals("tphere") || sub.equals("edit") || sub.equals("look")) {
+            if (sub.equals("delete") || sub.equals("tp") || sub.equals("tphere") || sub.equals("edit") || sub.equals("look") || sub.equals("executor")) {
                 List<String> npcNames = new ArrayList<>(plugin.getNpcManager().getNPCNames());
                 StringUtil.copyPartialMatches(args[1], npcNames, completions);
                 Collections.sort(completions);
@@ -46,6 +45,14 @@ public class NPCTabCompleter implements TabCompleter {
             }
 
             return new ArrayList<>();
+        }
+
+        if (args.length == 3) {
+            if (args[0].equalsIgnoreCase("executor")) {
+                List<String> types = Arrays.asList("console", "player");
+                StringUtil.copyPartialMatches(args[2], types, completions);
+                return completions;
+            }
         }
 
         return new ArrayList<>();

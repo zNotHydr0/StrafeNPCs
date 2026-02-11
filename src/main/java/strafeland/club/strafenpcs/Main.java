@@ -24,6 +24,7 @@ public class Main extends JavaPlugin {
 
         // Load managers
         this.npcManager = new NPCManager(this);
+        this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 
         // Register commands
         getCommand("npc").setExecutor(new NPCCommand(this));
@@ -33,7 +34,9 @@ public class Main extends JavaPlugin {
         PacketReader.init(this);
 
         // Load NPCs
-        npcManager.loadNPCs();
+        Bukkit.getScheduler().runTaskLater(this, () -> {
+            npcManager.loadNPCs();
+        }, 20L);
 
         // Notify Console
         Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_GRAY + "[" + ChatColor.DARK_AQUA + "StrafeNPCS" + ChatColor.DARK_GRAY + "]" + ChatColor.GREEN + " Plugin has been enabled successfully. Created by zNotHydr0 :)");

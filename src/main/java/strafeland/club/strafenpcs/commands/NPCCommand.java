@@ -207,6 +207,37 @@ public class NPCCommand implements CommandExecutor {
             return true;
         }
 
+        if (sub.equals("executor")) {
+            String targetName = plugin.getNpcManager().getEditor(p);
+
+            if (targetName == null) {
+                p.sendMessage(plugin.getFileManager().getMsg("chat-messages.not-editing"));
+                return true;
+            }
+
+            if (!plugin.getNpcManager().exists(targetName)) {
+                p.sendMessage(plugin.getFileManager().getMsg("chat-messages.npc-editing-not-found").replace("%name%", targetName));
+                plugin.getNpcManager().removeEditor(p);
+                return true;
+            }
+
+            if (args.length < 2) {
+                p.sendMessage(plugin.getFileManager().getMsg("chat-messages.invalid-executor"));
+                return true;
+            }
+
+            String type = args[1].toUpperCase();
+            if (type.equals("CONSOLE") || type.equals("PLAYER")) {
+                plugin.getNpcManager().setExecutorType(targetName, type);
+                p.sendMessage(plugin.getFileManager().getMsg("chat-messages.executor-set")
+                        .replace("%name%", targetName)
+                        .replace("%type%", type));
+            } else {
+                p.sendMessage(plugin.getFileManager().getMsg("chat-messages.invalid-executor"));
+            }
+            return true;
+        }
+
         return true;
     }
 }

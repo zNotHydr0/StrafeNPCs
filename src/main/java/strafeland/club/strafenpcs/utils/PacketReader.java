@@ -17,11 +17,15 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 public class PacketReader implements Listener {
 
     private static Main plugin;
+
+    private static final Map<UUID, Long> cooldowns = new HashMap<>();
 
     public static void init(Main instance) {
         plugin = instance;
@@ -121,6 +125,11 @@ public class PacketReader implements Listener {
                                     if (methodName.equals("channelRead")) {
                                         Object packet = args[1];
                                         if (packet.getClass().getSimpleName().equals("PacketPlayInUseEntity")) {
+                                            if (System.currentTimeMillis() - cooldowns.getOrDefault(p.getUniqueId(), 0L) < 500) {
+                                                return null;
+                                            }
+
+                                            cooldowns.put(p.getUniqueId(), System.currentTimeMillis());
 
                                             int id = -1;
                                             try {

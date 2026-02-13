@@ -20,6 +20,11 @@ public class NPCCommand implements CommandExecutor {
         if (!(sender instanceof Player)) return true;
         Player p = (Player) sender;
 
+        if (!p.hasPermission("strafenpcs.use")) {
+            p.sendMessage(plugin.getFileManager().getMsg("chat-messages.no-permission"));
+            return true;
+        }
+
         if (args.length < 1) {
             p.sendMessage(plugin.getFileManager().getMsg("chat-messages.usage"));
             return true;

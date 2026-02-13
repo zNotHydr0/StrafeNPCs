@@ -10,3 +10,7 @@ commands:
     description: Principal command to manage NPCs.
     usage: /npc <subcommand>
     aliases: [npcs]
+permissions:
+  strafenpcs.use:
+    description: Permission to use the /npc commands.
+    default: op

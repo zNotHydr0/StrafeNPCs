@@ -1,5 +1,7 @@
 package strafeland.club.strafenpcs.utils;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -11,8 +13,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import strafeland.club.strafenpcs.Main;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -24,7 +25,6 @@ import java.util.UUID;
 public class PacketReader implements Listener {
 
     private static Main plugin;
-
     private static final Map<UUID, Long> cooldowns = new HashMap<>();
 
     public static void init(Main instance) {
@@ -39,6 +39,7 @@ public class PacketReader implements Listener {
         for (Player p : Bukkit.getOnlinePlayers()) {
             uninject(p);
         }
+        cooldowns.clear();
     }
 
     @EventHandler
@@ -51,6 +52,7 @@ public class PacketReader implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent e) {
         uninject(e.getPlayer());
+        cooldowns.remove(e.getPlayer().getUniqueId());
     }
 
     @EventHandler
@@ -125,12 +127,6 @@ public class PacketReader implements Listener {
                                     if (methodName.equals("channelRead")) {
                                         Object packet = args[1];
                                         if (packet.getClass().getSimpleName().equals("PacketPlayInUseEntity")) {
-                                            if (System.currentTimeMillis() - cooldowns.getOrDefault(p.getUniqueId(), 0L) < 500) {
-                                                return null;
-                                            }
-
-                                            cooldowns.put(p.getUniqueId(), System.currentTimeMillis());
-
                                             int id = -1;
                                             try {
                                                 Field f = packet.getClass().getDeclaredField("a");
@@ -148,7 +144,13 @@ public class PacketReader implements Listener {
 
                                             if (id != -1) {
                                                 String npcName = plugin.getNpcManager().getNameById(id);
+
                                                 if (npcName != null) {
+                                                    if (System.currentTimeMillis() - cooldowns.getOrDefault(p.getUniqueId(), 0L) < 500) {
+                                                        return null;
+                                                    }
+                                                    cooldowns.put(p.getUniqueId(), System.currentTimeMillis());
+
                                                     Bukkit.getScheduler().runTask(plugin, () -> {
                                                         String cmd = plugin.getFileManager().getSaves().getString("npcs." + npcName + ".command");
 
@@ -166,9 +168,21 @@ public class PacketReader implements Listener {
                                                             }
 
                                                             if (finalCmd.startsWith("server ")) {
-                                                                String targetServer = finalCmd.split(" ")[1];
-                                                                ByteArrayDataOutput out = ByteStreams.newDataOutput();out.writeUTF("Connect");out.writeUTF(targetServer);
+                                                                String[] parts = finalCmd.split(" ");
+                                                                if (parts.length > 1) {
+                                                                    String targetServer = parts[1];
+                                                                    ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                                                                    out.writeUTF("Connect");
+                                                                    out.writeUTF(targetServer);
+                                                                    p.sendPluginMessage(plugin, "BungeeCord", out.toByteArray());
+                                                                }
+                                                                return;
+                                                            }
 
+                                                            if (finalCmd.equalsIgnoreCase("lobby") || finalCmd.equalsIgnoreCase("hub")) {
+                                                                ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                                                                out.writeUTF("Connect");
+                                                                out.writeUTF("lobby");
                                                                 p.sendPluginMessage(plugin, "BungeeCord", out.toByteArray());
                                                                 return;
                                                             }

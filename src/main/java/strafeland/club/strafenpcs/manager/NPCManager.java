@@ -244,8 +244,20 @@ public class NPCManager {
             float yaw = (float) npc.getClass().getField("yaw").get(npc);
             Object rotPacket = rotConst.newInstance(npc, (byte) (yaw * 256 / 360));
 
+            Method getDataWatcher = npc.getClass().getMethod("getDataWatcher");
+            Object watcher = getDataWatcher.invoke(npc);
+
+            Method watch = watcher.getClass().getMethod("watch", int.class, Object.class);
+            watch.invoke(watcher, 10, (byte) 127);
+
+            Class<?> metaClass = ReflectionUtils.getNMSClass("PacketPlayOutEntityMetadata");
+            Constructor<?> metaConst = metaClass.getConstructor(int.class, ReflectionUtils.getNMSClass("DataWatcher"), boolean.class);
+            Method getId = npc.getClass().getMethod("getId");
+            Object metaPacket = metaConst.newInstance(getId.invoke(npc), watcher, true);
+
             ReflectionUtils.sendPacket(p, infoPacket);
             ReflectionUtils.sendPacket(p, spawnPacket);
+            ReflectionUtils.sendPacket(p, metaPacket);
             ReflectionUtils.sendPacket(p, rotPacket);
 
             Method getProfile = npc.getClass().getMethod("getProfile");
@@ -259,6 +271,7 @@ public class NPCManager {
                     ReflectionUtils.sendPacket(p, removePacket);
                 } catch (Exception e) { e.printStackTrace(); }
             }, 5L);
+
         } catch (Exception e) { e.printStackTrace(); }
     }
 
